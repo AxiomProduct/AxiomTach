@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Axiom Tach</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#05080f;--card:rgba(255,255,255,.04);--stroke:rgba(168,85,247,.15);
+    --txt:#eaf6ff;--muted:#8ba6bd;--accent:#a855f7;--accent2:#7c3aed;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{font-family:"Inter",sans-serif;background:var(--bg);color:var(--txt);overflow-x:hidden;display:flex;flex-direction:column;min-height:100vh}
+  h1,h2,h3,.brand,.logoText{font-family:"Space Grotesk",sans-serif}
+  a{color:inherit;text-decoration:none}
+
+  .glow{position:fixed;border-radius:50%;filter:blur(130px);opacity:.45;z-index:0;pointer-events:none}
+  .g1{width:460px;height:460px;background:#a855f7;top:-140px;left:-90px}
+  .g2{width:400px;height:400px;background:#7c3aed;bottom:-140px;right:-70px;opacity:.32}
+
+  #snow{position:fixed;inset:0;z-index:1;pointer-events:none}
+
+  header{position:sticky;top:0;z-index:20;backdrop-filter:blur(12px);
+    background:rgba(5,8,15,.72);border-bottom:1px solid var(--stroke)}
+  .nav{display:flex;align-items:center;justify-content:space-between;height:74px}
+
+  .brand{display:flex;align-items:center;gap:12px;cursor:pointer}
+  .logoMark{display:flex;flex-direction:column;align-items:center;line-height:.85;
+    padding:8px 12px;border-radius:12px;background:radial-gradient(circle at 50% 40%,rgba(168,85,247,.18),transparent 70%)}
+  .logoMark .cw{font-family:"Space Grotesk";font-weight:700;font-size:24px;letter-spacing:1px;
+    color:#e9d5ff;text-shadow:0 0 12px var(--accent),0 0 26px rgba(168,85,247,.7)}
+  .logoMark .dlc{font-size:10px;letter-spacing:3px;color:#c084fc;text-shadow:0 0 8px var(--accent);margin-top:2px}
+  .brand .name{font-family:"Space Grotesk";font-weight:700;font-size:19px}
+  .brand .name span{color:var(--muted);font-weight:400}
+
+  .menu{display:flex;gap:30px;font-size:15px}
+  .menu a{color:var(--muted);transition:.2s;position:relative;padding:6px 0;cursor:pointer}
+  .menu a:hover{color:var(--txt)}
+  .menu a.active{color:var(--accent)}
+  .menu a.active::after{content:"";position:absolute;left:0;bottom:-2px;width:100%;height:2px;
+    background:var(--accent);border-radius:2px;box-shadow:0 0 10px var(--accent)}
+
+  .nav-right{display:flex;align-items:center;gap:14px}
+  .social{display:flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:10px;
+    border:1px solid var(--stroke);transition:.25s;color:var(--accent)}
+  .social svg{width:20px;height:20px}
+  .social:hover{border-color:var(--accent);background:rgba(168,85,247,.1);transform:translateY(-2px);
+    box-shadow:0 8px 22px rgba(168,85,247,.3)}
+
+  .btn{font-family:"Space Grotesk";font-weight:500;font-size:15px;padding:11px 22px;border-radius:10px;
+    cursor:pointer;border:none;transition:.25s;display:inline-flex;align-items:center;gap:8px}
+  .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(168,85,247,.4)}
+  .btn-ghost{background:transparent;color:var(--txt);border:1px solid var(--stroke)}
+  .btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+  .btn-sm{font-size:13px;padding:8px 18px}
+
+  .page{display:none;animation:fade .4s ease}
+  .page.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+  section{position:relative;z-index:2;padding:60px 0}
+  .container{max-width:1140px;margin:0 auto;padding:0 40px}
+  main.container{flex:1;width:100%}
+
+  /* HOME HERO */
+  .hero{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;text-align:center}
+  .hero h1{font-size:clamp(36px,6vw,72px);font-weight:700;background:linear-gradient(135deg,#e9d5ff,#a855f7,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:20px}
+  .hero p{color:var(--muted);font-size:18px;margin-bottom:32px;max-width:520px}
+
+  /* CATALOG */
+  .catalog-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:20px;padding-left:32px}
+  .game-card{position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--stroke);cursor:pointer;transition:.3s;aspect-ratio:1/1;display:flex;align-items:flex-end}
+  .game-card:hover{border-color:var(--accent);transform:translateY(-4px);box-shadow:0 12px 40px rgba(168,85,247,.2)}
+  .game-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .game-card .overlay{position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(5,8,15,.93) 78%)}
+  .game-card .info{position:relative;z-index:2;padding:18px;width:100%}
+  .game-card .info .name{font-family:"Space Grotesk";font-weight:700;font-size:18px}
+  .game-card .info .count{font-size:13px;color:var(--muted);margin-top:3px}
+
+  .items-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;padding-left:32px}
+  .item-card{position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--stroke);cursor:pointer;transition:.3s;aspect-ratio:1/1;display:flex;align-items:flex-end}
+  .item-card:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:0 8px 30px rgba(168,85,247,.18)}
+  .item-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .item-card .overlay{position:absolute;inset:0;background:linear-gradient(180deg,transparent 30%,rgba(5,8,15,.92) 72%)}
+  .item-card .info{position:relative;z-index:2;padding:14px;width:100%}
+  .item-card .info .name{font-family:"Space Grotesk";font-weight:600;font-size:15px}
+  .item-card .info .status{font-size:12px;margin-top:4px}
+  .item-card .info .status.updating{color:#ffc107}
+  .item-card .info .status.undetected{color:#a855f7}
+
+  .back-row{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+  .back-row .back-btn{background:none;border:none;color:var(--accent);cursor:pointer;font-family:"Space Grotesk";font-size:14px;display:flex;align-items:center;gap:6px;transition:.2s}
+  .back-row .back-btn:hover{color:#c084fc}
+
+  /* PRODUCT DETAIL */
+  .prod-wrap{display:flex;gap:28px;align-items:flex-start}
+  .prod-left{flex:1;min-width:0}
+  .prod-right{width:340px;flex-shrink:0;padding-right:8px}
+
+  .prod-title{font-size:26px;font-weight:700;margin-bottom:20px}
+  .prod-price-list{display:grid;gap:10px;margin-bottom:20px}
+  .prod-price-list .pr-row{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;background:rgba(255,255,255,.03);border-radius:12px;border:1px solid var(--stroke);transition:.25s}
+  .prod-price-list .pr-row:hover{border-color:rgba(168,85,247,.3);background:rgba(168,85,247,.06)}
+  .prod-price-list .pr-row .pr-label{font-size:15px}
+  .prod-price-list .pr-row .pr-value{font-family:"Space Grotesk";font-weight:700;font-size:22px;color:var(--accent)}
+  .prod-price-list .pr-row .pr-unavail{font-size:13px;color:var(--muted)}
+  .prod-price-list .pr-row .btn{font-size:14px;padding:10px 20px}
+
+  .pay-btn-wrap{margin-top:8px}
+  .pay-btn-wrap .btn{width:100%;justify-content:center;padding:14px;font-size:17px}
+
+  .prod-imgs{display:grid;gap:10px;margin-bottom:20px}
+  .prod-imgs img{width:100%;border-radius:12px;border:1px solid var(--stroke);object-fit:cover;max-height:200px}
+
+  .info-block{margin-bottom:18px}
+  .info-block .ib-title{font-family:"Space Grotesk";font-weight:600;font-size:15px;color:var(--accent);margin-bottom:8px}
+  .info-block .ib-body{font-size:14px;color:var(--muted);line-height:1.6}
+  .info-block .ib-body .highlight{color:var(--txt)}
+
+  .feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 12px}
+  .feature-grid .fg-item{padding:5px 0;font-size:13px;color:var(--muted);border-bottom:1px solid rgba(255,255,255,.03)}
+  .feature-grid .fg-item::before{content:"› ";color:var(--accent);font-weight:700}
+
+  /* LOADER */
+  .loader-wrap{max-width:500px;margin:0 auto;text-align:center}
+  .loader-wrap .lock-icon{font-size:48px;margin-bottom:16px;display:block}
+  .loader-wrap h2{font-size:clamp(24px,3vw,32px);font-weight:700;margin-bottom:8px}
+  .loader-wrap p{color:var(--muted);font-size:15px;margin-bottom:28px}
+  .loader-input{display:flex;flex-direction:column;gap:14px;background:var(--card);border:1px solid var(--stroke);border-radius:18px;padding:32px}
+  .loader-input input{background:rgba(255,255,255,.04);border:1px solid var(--stroke);border-radius:10px;padding:14px 16px;color:var(--txt);font-family:"Space Grotesk";font-size:18px;text-align:center;letter-spacing:3px;outline:none;transition:.2s;text-transform:uppercase}
+  .loader-input input:focus{border-color:var(--accent)}
+  .loader-input .loader-msg{font-size:14px;min-height:20px;transition:.3s}
+  .loader-input .loader-msg.error{color:#ff6b6b}
+  .loader-input .loader-msg.success{color:#a855f7}
+  .loader-input .loader-msg.hidden{opacity:0}
+  .loader-input .btn{justify-content:center;width:100%}
+  .loader-download{display:none;margin-top:24px;background:var(--card);border:1px solid var(--stroke);border-radius:18px;padding:28px;animation:fade .4s ease}
+  .loader-download.show{display:block}
+  .loader-download h3{font-size:20px;margin-bottom:10px;color:var(--accent)}
+  .loader-download p{color:var(--muted);font-size:14px;margin-bottom:18px}
+  .loader-download .btn{justify-content:center;width:100%}
+
+  /* FAQ */
+  .faq{max-width:760px;margin:0 auto;display:grid;gap:14px}
+  .q{background:var(--card);border:1px solid var(--stroke);border-radius:14px;overflow:hidden}
+  .q .qh{padding:20px 24px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;
+    font-family:"Space Grotesk";font-weight:500;font-size:16px}
+  .q .qh span{transition:.3s;color:var(--accent);font-size:22px}
+  .q .qb{max-height:0;overflow:hidden;transition:max-height .35s ease;color:var(--muted);
+    font-size:14.5px;line-height:1.7;padding:0 24px}
+  .q.open .qb{max-height:220px;padding:0 24px 22px}
+  .q.open .qh span{transform:rotate(45deg)}
+
+  footer{border-top:1px solid var(--stroke);padding:40px 0;position:relative;z-index:2;color:var(--muted);font-size:14px}
+  .foot{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+  .foot-social{display:flex;gap:12px}
+
+  .catalog-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
+  .catalog-header h2{font-size:26px;font-weight:700}
+
+  @media(max-width:900px){
+    .prod-wrap{flex-direction:column}
+    .prod-right{width:100%;max-height:none}
+    .feature-grid{grid-template-columns:repeat(2,1fr)}
+  }
+  @media(max-width:760px){
+    .menu{display:none}
+    .brand .name{display:none}
+    .feature-grid{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+  <div class="glow g1"></div>
+  <div class="glow g2"></div>
+  <canvas id="snow"></canvas>
+
+  <header>
+    <div class="container nav">
+      <div class="brand" data-tab="home">
+        <div class="logoMark"><div class="cw">AT</div><div class="dlc">Axiom Tach</div></div>
+        <div class="name">Axiom Tach</div>
+      </div>
+      <nav class="menu">
+        <a data-tab="home">Главная</a>
+        <a data-tab="catalog">Каталог</a>
+        <a data-tab="loader">Скачать Loader</a>
+        <a data-tab="faq">FAQ</a>
+      </nav>
+      <div class="nav-right">
+        <a class="social" href="https://t.me/CedWareDlc" target="_blank" title="Telegram">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.94 4.3l-3.2 15.1c-.24 1.07-.88 1.33-1.78.83l-4.92-3.63-2.37 2.28c-.26.26-.48.48-.99.48l.35-5 9.1-8.22c.4-.35-.09-.55-.61-.2L6.06 13.1l-4.85-1.52c-1.05-.33-1.07-1.05.22-1.55l18.96-7.3c.88-.32 1.65.2 1.55 1.57z"/></svg>
+        </a>
+        <button class="btn btn-primary" data-tab="loader">Скачать Loader</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- ГЛАВНАЯ -->
+    <div class="page active" id="home">
+      <section class="hero">
+        <h1>Dominate with Axiom</h1>
+        <p>Превосходство в каждой игре</p>
+        <button class="btn btn-primary btn-sm" data-tab="catalog">каталог</button>
+      </section>
+    </div>
+
+    <!-- КАТАЛОГ -->
+    <div class="page" id="catalog">
+      <section>
+        <div id="catalogView">
+          <!-- Список игр -->
+          <div id="catalogList">
+            <div class="catalog-header">
+              <h2>Каталог игр</h2>
+            </div>
+            <div class="catalog-grid">
+              <div class="game-card" data-game="rust">
+                <img src="Rust.png" alt="Rust">
+                <div class="overlay"></div>
+                <div class="info">
+                  <div class="name">Rust</div>
+                  <div class="count">2 товаров</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Товары выбранной игры -->
+          <div id="catalogItems" style="display:none">
+            <div class="back-row">
+              <button class="back-btn" id="backToList">← Назад к играм</button>
+            </div>
+            <div class="items-grid">
+              <div class="item-card" data-item="rust-devblog">
+                <img src="RustDevblog.png" alt="Rust Devblog">
+                <div class="overlay"></div>
+                <div class="info">
+                  <div class="name">Rust Devblog</div>
+                  <div class="status undetected">Undetected</div>
+                </div>
+              </div>
+              <div class="item-card" data-item="rust-steam">
+                <img src="RustSteam.png" alt="Rust Steam">
+                <div class="overlay"></div>
+                <div class="info">
+                  <div class="name">Rust Steam</div>
+                  <div class="status updating">Updating</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Детальный просмотр товара -->
+          <div id="productDetail" style="display:none">
+            <div class="back-row">
+              <button class="back-btn" id="backToItems">← Назад к товарам</button>
+            </div>
+            <div class="prod-wrap">
+              <div class="prod-left">
+                <div class="prod-imgs">
+                  <img src="RustDevblogInfo1.png" alt="Info 1">
+                  <img src="RustDevblogInfo2.png" alt="Info 2">
+                  <img src="RustDevblogInfo3.png" alt="Info 3">
+                </div>
+                <div class="info-block">
+                  <div class="ib-title">На какие именно чит пока работает</div>
+                  <div class="ib-body">
+                    OldRust<br>
+                    <span style="font-size:13px;color:var(--muted)">Со временем мы будем добавлять и другие проекты</span>
+                  </div>
+                </div>
+                <div class="info-block">
+                  <div class="ib-title">Что нужно?</div>
+                  <div class="ib-body">
+                    Флешка (необязательно)<br>
+                    Windows 10 / 11
+                  </div>
+                </div>
+                <div class="info-block">
+                  <div class="ib-title">Функционал</div>
+                  <div class="ib-body">
+                    <div class="feature-grid">
+                      <div class="fg-item">Visuals</div>
+                      <div class="fg-item">Esp</div>
+                      <div class="fg-item">Box</div>
+                      <div class="fg-item">Name</div>
+                      <div class="fg-item">Health</div>
+                      <div class="fg-item">Skeleton</div>
+                      <div class="fg-item">Distance</div>
+                      <div class="fg-item">Inventory</div>
+                      <div class="fg-item">Filters</div>
+                      <div class="fg-item">Ignore NPC</div>
+                      <div class="fg-item">Ignore team</div>
+                      <div class="fg-item">Ignore Sleepers</div>
+                      <div class="fg-item">Chams</div>
+                      <div class="fg-item">Crosshair</div>
+                      <div class="fg-item">Fov</div>
+                      <div class="fg-item">Aimbot</div>
+                      <div class="fg-item">Aim vector / silent</div>
+                      <div class="fg-item">Draw fov</div>
+                      <div class="fg-item">Aim bind</div>
+                      <div class="fg-item">Aim Bone / head / chest / stomach / pelvis</div>
+                      <div class="fg-item">Aim Smooth</div>
+                      <div class="fg-item">Aim predict</div>
+                      <div class="fg-item">Aim Target</div>
+                      <div class="fg-item">Setting</div>
+                      <div class="fg-item">Fake admin</div>
+                      <div class="fg-item">No recoil</div>
+                      <div class="fg-item">No spread</div>
+                      <div class="fg-item">Antiscreen</div>
+                      <div class="fg-item">Movement</div>
+                      <div class="fg-item">Spider</div>
+                      <div class="fg-item">Flyhack</div>
+                      <div class="fg-item">infiniteJump</div>
+                      <div class="fg-item">Airwalk</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="prod-right">
+                <div class="prod-title">AxiomTach Devblog</div>
+                <div class="prod-price-list">
+                  <div class="pr-row">
+                    <span class="pr-label">7 дней</span>
+                    <span class="pr-value">300₽</span>
+                    <button class="btn btn-primary btn-sm" id="pay7Days">Оплатить</button>
+                  </div>
+                  <div class="pr-row">
+                    <span class="pr-label">1 месяц</span>
+                    <span class="pr-value" style="color:var(--muted)">1 000₽</span>
+                    <span class="pr-unavail">Скоро</span>
+                  </div>
+                  <div class="pr-row">
+                    <span class="pr-label">Навсегда</span>
+                    <span class="pr-value" style="color:var(--muted)">2 500₽</span>
+                    <span class="pr-unavail">Скоро</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- СКАЧАТЬ LOADER -->
+    <div class="page" id="loader">
+      <section>
+        <div class="loader-wrap">
+          <span class="lock-icon">🔒</span>
+          <h2>Скачать Loader</h2>
+          <p>Введи ключ доступа, чтобы скачать лоадер</p>
+          <div class="loader-input">
+            <input type="text" id="keyInput" placeholder="XXXX-XXXX-XXXX" maxlength="30" autocomplete="off">
+            <div class="loader-msg hidden" id="loaderMsg"></div>
+            <button class="btn btn-primary" id="checkKeyBtn">Проверить ключ</button>
+          </div>
+          <div class="loader-download" id="loaderDownload">
+            <h3>✓ Ключ принят</h3>
+            <p>Твой ключ действителен. Нажми кнопку ниже, чтобы скачать лоадер.</p>
+            <a class="btn btn-primary" href="loader.zip" download>Скачать Loader</a>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- FAQ -->
+    <div class="page" id="faq">
+      <section>
+        <div class="faq">
+          <div class="q"><div class="qh">Как получить доступ после оплаты?<span>+</span></div><div class="qb">После оплаты вам откроется окно с самим товаром, если закроете окно в почте будет ваш товар.</div></div>
+          <div class="q"><div class="qh">Где взять ключ для Loader?<span>+</span></div><div class="qb">Ключ выдаётся после покупки товара в каталоге. Приходит в Telegram.</div></div>
+          <div class="q"><div class="qh">На каких системах работает?<span>+</span></div><div class="qb">Смотрите на товарах вашего желаемого продукта там будет написано.</div></div>
+          <div class="q"><div class="qh">Как работает поддержка?<span>+</span></div><div class="qb">Команда на связи 24/7 в Telegram, среднее время ответа — менее 10 минут.</div></div>
+        </div>
+      </section>
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="container foot">
+      <div class="brand" data-tab="home">
+        <div class="logoMark"><div class="cw">AT</div><div class="dlc">Axiom Tach</div></div>
+        <div class="name">Axiom Tach</div>
+      </div>
+      <div class="foot-social">
+        <a class="social" href="https://t.me/CedWareDlc" target="_blank" title="Telegram">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.94 4.3l-3.2 15.1c-.24 1.07-.88 1.33-1.78.83l-4.92-3.63-2.37 2.28c-.26.26-.48.48-.99.48l.35-5 9.1-8.22c.4-.35-.09-.55-.61-.2L6.06 13.1l-4.85-1.52c-1.05-.33-1.07-1.05.22-1.55l18.96-7.3c.88-.32 1.65.2 1.55 1.57z"/></svg>
+        </a>
+      </div>
+      <div>© 2026 Axiom Tach. Все права защищены.</div>
+    </div>
+  </footer>
+
+<script>
+  /* === ВКЛАДКИ === */
+  const pages=[...document.querySelectorAll('.page')];
+  const links=[...document.querySelectorAll('.menu a')];
+  function showTab(id){
+    if(!document.getElementById(id))id='home';
+    pages.forEach(p=>p.classList.toggle('active',p.id===id));
+    links.forEach(l=>l.classList.toggle('active',l.dataset.tab===id));
+    window.scrollTo({top:0,behavior:'smooth'});
+    if(location.hash.slice(1)!==id)history.pushState(null,'','#'+id);
+  }
+  document.querySelectorAll('[data-tab]').forEach(el=>el.addEventListener('click',()=>showTab(el.dataset.tab)));
+  addEventListener('popstate',()=>showTab(location.hash.slice(1)||'home'));
+  showTab(location.hash.slice(1)||'home');
+
+  /* === КАТАЛОГ: управление состояниями === */
+  const catalogList=document.getElementById('catalogList');
+  const catalogItems=document.getElementById('catalogItems');
+  const productDetail=document.getElementById('productDetail');
+
+  function showCatalogView(view){
+    catalogList.style.display=view==='list'?'block':'none';
+    catalogItems.style.display=view==='items'?'block':'none';
+    productDetail.style.display=view==='detail'?'block':'none';
+  }
+
+  document.querySelectorAll('.game-card').forEach(card=>{
+    card.addEventListener('click',()=>{
+      showCatalogView('items');
+    });
+  });
+
+  document.getElementById('backToList').addEventListener('click',()=>{
+    showCatalogView('list');
+  });
+
+  document.querySelectorAll('.item-card').forEach(card=>{
+    card.addEventListener('click',()=>{
+      const item=card.dataset.item;
+      if(item==='rust-devblog'){
+        showCatalogView('detail');
+      }
+    });
+  });
+
+  document.getElementById('backToItems').addEventListener('click',()=>{
+    showCatalogView('items');
+  });
+
+  /* === ОПЛАТА === */
+  function setupPayButton(){
+    const payBtn=document.getElementById('pay7Days');
+    if(!payBtn)return;
+    function setUrl(url){
+      payBtn.onclick=function(){window.open(url,'_blank')};
+    }
+    function fallback(){
+      var x=new XMLHttpRequest();
+      try{
+        x.open('GET','Oplata.txt',true);
+        x.onreadystatechange=function(){
+          if(x.readyState===4&&x.status===200){
+            var u=x.responseText.trim();
+            u?setUrl(u):setUrl('Oplata.txt');
+          }else if(x.readyState===4)setUrl('Oplata.txt');
+        };
+        x.send();
+      }catch(e){setUrl('Oplata.txt')}
+    }
+    try{
+      fetch('Oplata.txt').then(function(r){return r.text()}).then(function(t){
+        var u=t.trim();u?setUrl(u):setUrl('Oplata.txt');
+      }).catch(fallback);
+    }catch(e){fallback()}
+  }
+  setupPayButton();
+
+  /* === LOADER === */
+  const keyInput=document.getElementById('keyInput');
+  const checkBtn=document.getElementById('checkKeyBtn');
+  const loaderMsg=document.getElementById('loaderMsg');
+  const loaderDownload=document.getElementById('loaderDownload');
+
+  async function validateKey(key){
+    try{
+      const res=await fetch('keys.txt');
+      const text=await res.text();
+      const keys=text.split('\n').map(k=>k.trim()).filter(k=>k);
+      return keys.includes(key);
+    }catch{
+      return false;
+    }
+  }
+
+  async function handleKeyCheck(){
+    const key=keyInput.value.trim().toUpperCase();
+    if(!key){
+      loaderMsg.textContent='Введи ключ доступа';
+      loaderMsg.className='loader-msg error';
+      return;
+    }
+    loaderMsg.textContent='Проверка ключа...';
+    loaderMsg.className='loader-msg hidden';
+    checkBtn.disabled=true;
+    checkBtn.textContent='Проверка...';
+
+    const valid=await validateKey(key);
+
+    if(valid){
+      loaderMsg.textContent='✓ Ключ действителен!';
+      loaderMsg.className='loader-msg success';
+      loaderDownload.classList.add('show');
+    }else{
+      loaderMsg.textContent='✗ Неверный ключ. Попробуй ещё раз.';
+      loaderMsg.className='loader-msg error';
+      loaderDownload.classList.remove('show');
+    }
+    checkBtn.disabled=false;
+    checkBtn.textContent='Проверить ключ';
+  }
+
+  checkBtn.addEventListener('click',handleKeyCheck);
+  keyInput.addEventListener('keydown',e=>{if(e.key==='Enter')handleKeyCheck()});
+
+  /* === FAQ === */
+  document.querySelectorAll('.q .qh').forEach(h=>h.addEventListener('click',()=>h.parentElement.classList.toggle('open')));
+
+  /* === СНЕГ === */
+  (function(){
+    const c=document.getElementById('snow'),x=c.getContext('2d');
+    let w,h,flakes;
+    const COUNT=45;
+    function resize(){
+      w=c.width=innerWidth; h=c.height=innerHeight;
+      flakes=Array.from({length:COUNT},()=>({
+        x:Math.random()*w, y:Math.random()*h,
+        r:Math.random()*2+1, d:Math.random()*0.5+0.2, sway:Math.random()*Math.PI*2
+      }));
+    }
+    resize(); addEventListener('resize',resize);
+    function draw(){
+      x.clearRect(0,0,w,h);
+      x.fillStyle='rgba(200,235,255,0.7)';
+      x.beginPath();
+      for(const f of flakes){ x.moveTo(f.x,f.y); x.arc(f.x,f.y,f.r,0,Math.PI*2); }
+      x.fill();
+      for(const f of flakes){
+        f.sway+=0.01; f.y+=f.d; f.x+=Math.sin(f.sway)*0.3;
+        if(f.y>h+5){ f.y=-5; f.x=Math.random()*w; }
+      }
+      requestAnimationFrame(draw);
+    }
+    draw();
+  })();
+</script>
+</body>
+</html>
