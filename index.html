@@ -508,19 +508,24 @@
   const loaderMsg=document.getElementById('loaderMsg');
   const loaderDownload=document.getElementById('loaderDownload');
 
-  async function validateKey(key){
-    try{
-      const res=await fetch('keys.txt');
-      const text=await res.text();
-      const keys=text.split('\n').map(k=>k.trim()).filter(k=>k);
-      return keys.includes(key);
-    }catch{
-      return false;
-    }
+  var VALID_KEYS=["KEYAUTH-d3fVP1-jnyzHt-J5669O-XXt8jR-QlxQzl-SqJg8L","KEYAUTH-AcYfRZ-4eVUEp-gXJT7L-GsalYt-Mu90jC-dw3J0S","KEYAUTH-89Vt5j-Y0vTPH-39CCOq-Frh4DS-yoDSG8-oEl2AL","KEYAUTH-VAk8zm-xZ3PCB-0G34Dr-OfrY0K-6XksnS-ZzZOJ4","KEYAUTH-mt88bn-j0kKRx-VCT6Tk-v3sFaW-F0xuK6-LVUgoK","KEYAUTH-482qYY-YSE0W0-tbMPf2-4NASP7-iqqavY-vNfsin","KEYAUTH-frkiNd-6siP8d-XcIqfQ-fgunLp-pfGZ20-pCuLWu","KEYAUTH-TRNZv8-yYStgl-7vPrUT-GTWAUU-bwBrtz-Rj4dwR"];
+  function validateKey(key){
+    return new Promise(function(resolve){
+      function checkFromFile(text){
+        var fileKeys=text.split('\n').map(function(k){return k.trim()}).filter(function(k){return k});
+        resolve(fileKeys.indexOf(key)!==-1);
+      }
+      function fallback(){
+        resolve(VALID_KEYS.indexOf(key)!==-1);
+      }
+      try{
+        fetch('keys.txt').then(function(r){return r.text()}).then(checkFromFile).catch(fallback);
+      }catch(e){fallback()}
+    });
   }
 
   async function handleKeyCheck(){
-    const key=keyInput.value.trim().toUpperCase();
+    const key=keyInput.value.trim();
     if(!key){
       loaderMsg.textContent='Введи ключ доступа';
       loaderMsg.className='loader-msg error';
