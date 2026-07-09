@@ -125,6 +125,21 @@
   .feature-grid .fg-item{padding:5px 0;font-size:13px;color:var(--muted);border-bottom:1px solid rgba(255,255,255,.03)}
   .feature-grid .fg-item::before{content:"› ";color:var(--accent);font-weight:700}
 
+  /* PAYMENT MODAL */
+  .modal-overlay{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;animation:fade .25s ease}
+  .modal-overlay.show{display:flex}
+  .modal-box{background:var(--bg);border:1px solid var(--stroke);border-radius:20px;padding:36px;width:380px;max-width:90vw;animation:fade .3s ease}
+  .modal-title{font-family:"Space Grotesk";font-size:20px;font-weight:700;margin-bottom:20px;text-align:center}
+  .modal-options{display:grid;gap:12px}
+  .modal-opt{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-radius:14px;border:1px solid var(--stroke);cursor:pointer;transition:.25s;background:var(--card)}
+  .modal-opt:hover{border-color:var(--accent);background:rgba(168,85,247,.08)}
+  .modal-opt .opt-name{font-family:"Space Grotesk";font-weight:600;font-size:16px}
+  .modal-opt .opt-status{font-size:13px}
+  .modal-opt .opt-status.unavail{color:var(--muted)}
+  .modal-opt .opt-status.avail{color:#34d6ff}
+  .modal-close{display:block;margin:18px auto 0;background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;font-family:"Space Grotesk";transition:.2s}
+  .modal-close:hover{color:var(--txt)}
+
   /* LOADER */
   .loader-wrap{max-width:500px;margin:0 auto;text-align:center}
   .loader-wrap .lock-icon{font-size:48px;margin-bottom:16px;display:block}
@@ -343,6 +358,27 @@
                     <span class="pr-unavail">Скоро</span>
                   </div>
                 </div>
+                <!-- Payment Modal -->
+                <div class="modal-overlay" id="payModal">
+                  <div class="modal-box">
+                    <div class="modal-title">Способ оплаты</div>
+                    <div class="modal-options">
+                      <div class="modal-opt" id="optTelegram">
+                        <span class="opt-name">Telegram Bot</span>
+                        <span class="opt-status avail">Доступен</span>
+                      </div>
+                      <div class="modal-opt" id="optFunpay">
+                        <span class="opt-name">Funpay</span>
+                        <span class="opt-status avail">Доступен</span>
+                      </div>
+                      <div class="modal-opt">
+                        <span class="opt-name">Ru карта</span>
+                        <span class="opt-status unavail">Недоступен</span>
+                      </div>
+                    </div>
+                    <button class="modal-close" id="modalClose">Закрыть</button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -365,7 +401,7 @@
           <div class="loader-download" id="loaderDownload">
             <h3>✓ Ключ принят</h3>
             <p>Твой ключ действителен. Нажми кнопку ниже, чтобы скачать лоадер.</p>
-            <a class="btn btn-primary" href="loader.zip" download>Скачать Loader</a>
+            <a class="btn btn-primary" href="Loader.exe" download>Скачать Loader</a>
           </div>
         </div>
       </section>
@@ -449,33 +485,22 @@
     showCatalogView('items');
   });
 
-  /* === ОПЛАТА === */
-  function setupPayButton(){
-    const payBtn=document.getElementById('pay7Days');
-    if(!payBtn)return;
-    function setUrl(url){
-      payBtn.onclick=function(){window.open(url,'_blank')};
-    }
-    function fallback(){
-      var x=new XMLHttpRequest();
-      try{
-        x.open('GET','Oplata.txt',true);
-        x.onreadystatechange=function(){
-          if(x.readyState===4&&x.status===200){
-            var u=x.responseText.trim();
-            u?setUrl(u):setUrl('Oplata.txt');
-          }else if(x.readyState===4)setUrl('Oplata.txt');
-        };
-        x.send();
-      }catch(e){setUrl('Oplata.txt')}
-    }
-    try{
-      fetch('Oplata.txt').then(function(r){return r.text()}).then(function(t){
-        var u=t.trim();u?setUrl(u):setUrl('Oplata.txt');
-      }).catch(fallback);
-    }catch(e){fallback()}
-  }
-  setupPayButton();
+  /* === ОПЛАТА (модалка) === */
+  document.getElementById('pay7Days').addEventListener('click',function(){
+    document.getElementById('payModal').classList.add('show');
+  });
+  document.getElementById('modalClose').addEventListener('click',function(){
+    document.getElementById('payModal').classList.remove('show');
+  });
+  document.getElementById('payModal').addEventListener('click',function(e){
+    if(e.target===this)this.classList.remove('show');
+  });
+  document.getElementById('optTelegram').addEventListener('click',function(){
+    window.open('https://t.me/AxiomTach_bot','_blank');
+  });
+  document.getElementById('optFunpay').addEventListener('click',function(){
+    window.open('https://funpay.com/lots/offer?id=38085578','_blank');
+  });
 
   /* === LOADER === */
   const keyInput=document.getElementById('keyInput');
